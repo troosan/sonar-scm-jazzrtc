@@ -1,6 +1,6 @@
 /*
  * SonarQube :: Plugins :: SCM :: Jazz RTC
- * Copyright (C) 2009 ${owner}
+ * Copyright (C) 2014 SonarSource
  * dev@sonar.codehaus.org
  *
  * This program is free software; you can redistribute it and/or
