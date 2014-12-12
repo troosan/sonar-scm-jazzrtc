@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,7 +65,6 @@ public class JazzRtcBlameConsumer implements StreamConsumer {
     if (!matcher.matches()) {
       throw new IllegalStateException("Unable to blame file " + filename + ". Unrecognized blame info at line " + (getLines().size() + 1) + ": " + line);
     }
-    String lineNumberStr = matcher.group(1);
     String owner = matcher.group(2);
     String changeSetNumberStr = matcher.group(3);
     String dateStr = matcher.group(4);

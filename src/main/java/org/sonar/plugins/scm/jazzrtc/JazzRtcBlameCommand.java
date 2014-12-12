@@ -85,13 +85,15 @@ public class JazzRtcBlameCommand extends BlameCommand {
     Command cl = Command.create("scm");
     cl.setDirectory(workingDirectory);
     cl.addArgument("annotate");
-    if (config.username() != null) {
+    String username = config.username();
+    if (username != null) {
       cl.addArgument("-u");
-      cl.addArgument(config.username());
+      cl.addArgument(username);
     }
-    if (config.password() != null) {
+    String password = config.password();
+    if (password != null) {
       cl.addArgument("-P");
-      cl.addMaskedArgument(config.password());
+      cl.addMaskedArgument(password);
     }
     cl.addArgument(filename);
     return cl;
