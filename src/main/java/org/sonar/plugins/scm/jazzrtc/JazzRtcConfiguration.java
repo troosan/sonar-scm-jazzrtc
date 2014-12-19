@@ -49,7 +49,7 @@ public class JazzRtcConfiguration implements BatchComponent {
     return ImmutableList.of(
       PropertyDefinition.builder(USER_PROP_KEY)
         .name("Username")
-        .description("Username to be used for CVS authentication")
+        .description("Username to be used for Jazz RTC authentication")
         .type(PropertyType.STRING)
         .onQualifiers(Qualifiers.PROJECT)
         .category(CoreProperties.CATEGORY_SCM)
@@ -58,7 +58,7 @@ public class JazzRtcConfiguration implements BatchComponent {
         .build(),
       PropertyDefinition.builder(PASSWORD_PROP_KEY)
         .name("Password")
-        .description("Password to be used for CVS authentication")
+        .description("Password to be used for Jazz RTC authentication")
         .type(PropertyType.PASSWORD)
         .onQualifiers(Qualifiers.PROJECT)
         .category(CoreProperties.CATEGORY_SCM)
