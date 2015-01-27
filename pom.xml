@@ -4,7 +4,8 @@
   <parent>
     <groupId>org.codehaus.sonar-plugins</groupId>
     <artifactId>parent</artifactId>
-    <version>18</version>
+    <version>19</version>
+    <relativePath/>
   </parent>
   <artifactId>sonar-scm-jazzrtc-plugin</artifactId>
   <name>SonarQube :: Plugins :: SCM :: Jazz RTC</name>
@@ -52,7 +53,7 @@
   </ciManagement>
 
   <properties>
-    <sonar.buildVersion>5.0-RC3</sonar.buildVersion>
+    <sonar.buildVersion>5.0</sonar.buildVersion>
     <sonar.pluginName>Jazz RTC</sonar.pluginName>
     <sonar.pluginClass>org.sonar.plugins.scm.jazzrtc.JazzRtcPlugin</sonar.pluginClass>
   </properties>

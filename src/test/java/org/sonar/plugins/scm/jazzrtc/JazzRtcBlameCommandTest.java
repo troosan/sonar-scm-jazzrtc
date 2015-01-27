@@ -101,6 +101,37 @@ public class JazzRtcBlameCommandTest {
   }
 
   @Test
+  public void testParsingOfOutputWithWrappedCode() throws IOException {
+    File source = new File(baseDir, "src/foo.xoo");
+    FileUtils.write(source, "sample content");
+    DefaultInputFile inputFile = new DefaultInputFile("foo", "src/foo.xoo").setLines(3).setAbsolutePath(new File(baseDir, "src/foo.xoo").getAbsolutePath());
+    fs.add(inputFile);
+
+    BlameOutput result = mock(BlameOutput.class);
+    CommandExecutor commandExecutor = mock(CommandExecutor.class);
+
+    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
+
+      @Override
+      public Integer answer(InvocationOnMock invocation) throws Throwable {
+        StreamConsumer outConsumer = (StreamConsumer) invocation.getArguments()[1];
+        outConsumer.consumeLine("1 Julien HENRY (1000) 2014-12-09 09:14 AM  Partager");
+        outConsumer.consumeLine("foo");
+        outConsumer.consumeLine("2 Julien HENRY (1000) 2014-12-09 09:14 AM  Partager ");
+        outConsumer.consumeLine("3 Julien HENRY (1000) 2014-12-09 09:14 AM  Partager bar");
+        return 0;
+      }
+    });
+
+    when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    verify(result).blameResult(inputFile,
+      Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY")));
+  }
+
+  @Test
   public void testAddMissingLastLine() throws IOException {
     File source = new File(baseDir, "src/foo.xoo");
     FileUtils.write(source, "sample content");

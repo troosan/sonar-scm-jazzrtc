@@ -61,9 +61,21 @@ public class JazzRtcBlameConsumer implements StreamConsumer {
 
   @Override
   public void consumeLine(String line) {
+    int expectingLine = getLines().size() + 1;
     Matcher matcher = pattern.matcher(line);
     if (!matcher.matches()) {
-      throw new IllegalStateException("Unable to blame file " + filename + ". Unrecognized blame info at line " + (getLines().size() + 1) + ": " + line);
+      // Probably code, ignore
+      return;
+    }
+    String lineStr = matcher.group(1);
+    int lineIdx;
+    try {
+      lineIdx = Integer.parseInt(lineStr);
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException("Unable to blame file " + filename + ". Unrecognized blame info at line " + expectingLine + ": " + line);
+    }
+    if (expectingLine != lineIdx) {
+      throw new IllegalStateException("Unable to blame file " + filename + ". Expecting blame info for line " + expectingLine + " but was " + lineIdx + ": " + line);
     }
     String owner = matcher.group(2);
     String changeSetNumberStr = matcher.group(3);
