@@ -49,7 +49,7 @@
   
   <ciManagement>
     <system>Cloudbees</system>
-    <url>TODO</url>
+    <url>https://sonarplugins.ci.cloudbees.com/job/scm-jazzrtc/</url>
   </ciManagement>
 
   <properties>
@@ -79,12 +79,6 @@
       <version>${sonar.buildVersion}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
-      <version>1.3</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.mockito</groupId>
@@ -94,12 +88,4 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.sonar</groupId>
-        <artifactId>sonar-packaging-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>
