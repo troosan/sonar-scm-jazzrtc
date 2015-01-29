@@ -5,11 +5,11 @@
     <groupId>org.codehaus.sonar-plugins</groupId>
     <artifactId>parent</artifactId>
     <version>19</version>
-    <relativePath/>
+    <relativePath />
   </parent>
   <artifactId>sonar-scm-jazzrtc-plugin</artifactId>
   <name>SonarQube :: Plugins :: SCM :: Jazz RTC</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>sonar-plugin</packaging>
   <description>Jazz Rational Team Concert SCM Provider.</description>
   <url>http://redirect.sonarsource.com/plugins/scmjazzrtc.html</url>
@@ -40,6 +40,7 @@
     <connection>scm:git:git@github.com:SonarCommunity/sonar-scm-jazzrtc.git</connection>
     <developerConnection>scm:git:git@github.com:SonarCommunity/sonar-scm-jazzrtc.git</developerConnection>
     <url>https://github.com/SonarCommunity/sonar-scm-jazzrtc</url>
+    <tag>1.0</tag>
   </scm>
   
   <issueManagement>
