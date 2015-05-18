@@ -82,9 +82,10 @@ public class JazzRtcBlameCommand extends BlameCommand {
   }
 
   private Command createCommandLine(File workingDirectory, String filename) {
-    Command cl = Command.create("scm");
+    Command cl = Command.create("lscm");
     cl.setDirectory(workingDirectory);
     cl.addArgument("annotate");
+    cl.addArgument("--non-interactive");
     String username = config.username();
     if (username != null) {
       cl.addArgument("-u");
