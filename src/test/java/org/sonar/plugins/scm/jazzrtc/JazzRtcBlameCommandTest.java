@@ -52,6 +52,9 @@ import static org.mockito.Mockito.when;
 public class JazzRtcBlameCommandTest {
 
   @Rule
+  public UTCRule utcRule = new UTCRule();
+
+  @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
   @Rule
@@ -95,9 +98,9 @@ public class JazzRtcBlameCommandTest {
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
     new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
     verify(result).blameResult(inputFile,
-      Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
-        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
-        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY")));
+      Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
   }
 
   @Test
@@ -126,9 +129,9 @@ public class JazzRtcBlameCommandTest {
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
     new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
     verify(result).blameResult(inputFile,
-      Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
-        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
-        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY")));
+      Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
   }
 
   @Test
@@ -157,10 +160,10 @@ public class JazzRtcBlameCommandTest {
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
     new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
     verify(result).blameResult(inputFile,
-      Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
-        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
-        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY"),
-        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0100")).revision("1000").author("Julien HENRY")));
+      Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
+        new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
   }
 
 }
