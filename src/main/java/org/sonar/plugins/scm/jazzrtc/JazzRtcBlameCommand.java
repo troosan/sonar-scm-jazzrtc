@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
+import java.io.File;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
@@ -29,9 +31,6 @@ import org.sonar.api.utils.command.Command;
 import org.sonar.api.utils.command.CommandExecutor;
 import org.sonar.api.utils.command.StreamConsumer;
 import org.sonar.api.utils.command.StringStreamConsumer;
-
-import java.io.File;
-import java.util.List;
 
 public class JazzRtcBlameCommand extends BlameCommand {
 
@@ -85,7 +84,6 @@ public class JazzRtcBlameCommand extends BlameCommand {
     Command cl = Command.create("lscm");
     cl.setDirectory(workingDirectory);
     cl.addArgument("annotate");
-    cl.addArgument("--non-interactive");
     String username = config.username();
     if (username != null) {
       cl.addArgument("-u");
