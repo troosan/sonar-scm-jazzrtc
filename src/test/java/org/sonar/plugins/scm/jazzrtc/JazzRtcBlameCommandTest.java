@@ -19,6 +19,9 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
+import org.sonar.api.utils.command.TimeoutException;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -43,14 +46,24 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.mockito.Mockito.mock;
+
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class JazzRtcBlameCommandTest {
-
+  @Mock
+  private BlameOutput result;
+  
+  @Mock
+  private CommandExecutor commandExecutor;
+  
+  @Mock
+  private BlameInput input;
+  
   @Rule
   public UTCRule utcRule = new UTCRule();
 
@@ -62,26 +75,28 @@ public class JazzRtcBlameCommandTest {
 
   private DefaultFileSystem fs;
   private File baseDir;
-  private BlameInput input;
-
+  
   @Before
   public void prepare() throws IOException {
+    MockitoAnnotations.initMocks(this);
+    
     baseDir = temp.newFolder();
     fs = new DefaultFileSystem();
     fs.setBaseDir(baseDir);
-    input = mock(BlameInput.class);
     when(input.fileSystem()).thenReturn(fs);
+  }
+  
+  private DefaultInputFile createTestFile(String filePath, int numLines) throws IOException {
+    File source = new File(baseDir, filePath);
+    FileUtils.write(source, "sample content");
+    DefaultInputFile inputFile = new DefaultInputFile("foo", filePath).setLines(numLines).setAbsolutePath(new File(baseDir, filePath).getAbsolutePath());
+    fs.add(inputFile);
+    return inputFile;
   }
 
   @Test
   public void testParsingOfOutput() throws IOException {
-    File source = new File(baseDir, "src/foo.xoo");
-    FileUtils.write(source, "sample content");
-    DefaultInputFile inputFile = new DefaultInputFile("foo", "src/foo.xoo").setLines(3).setAbsolutePath(new File(baseDir, "src/foo.xoo").getAbsolutePath());
-    fs.add(inputFile);
-
-    BlameOutput result = mock(BlameOutput.class);
-    CommandExecutor commandExecutor = mock(CommandExecutor.class);
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
 
     when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
 
@@ -105,13 +120,7 @@ public class JazzRtcBlameCommandTest {
 
   @Test
   public void testParsingOfOutputWithWrappedCode() throws IOException {
-    File source = new File(baseDir, "src/foo.xoo");
-    FileUtils.write(source, "sample content");
-    DefaultInputFile inputFile = new DefaultInputFile("foo", "src/foo.xoo").setLines(3).setAbsolutePath(new File(baseDir, "src/foo.xoo").getAbsolutePath());
-    fs.add(inputFile);
-
-    BlameOutput result = mock(BlameOutput.class);
-    CommandExecutor commandExecutor = mock(CommandExecutor.class);
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
 
     when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
 
@@ -133,16 +142,106 @@ public class JazzRtcBlameCommandTest {
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
   }
+  
+  @Test
+  public void testUntrackedFile() throws IOException {
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
+
+    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
+
+      @Override
+      public Integer answer(InvocationOnMock invocation) throws Throwable {
+        StreamConsumer outConsumer = (StreamConsumer) invocation.getArguments()[1];
+        outConsumer.consumeLine("Problem running 'annotate':");
+        outConsumer.consumeLine("Annotate failed.");
+        outConsumer.consumeLine("failed to find the given file state starting with the given change set in the current configuration");
+        outConsumer.consumeLine("Check the log for details about the error at \"/home/user/.jazz-scm\". If you have configured custom logging check your log configuration settings for the path to the log file.");
+        return 3;
+      }
+    });
+    
+    when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    
+    verifyZeroInteractions(result);
+  }
+  
+  @Test
+  public void testUntrackedFile2() throws IOException {
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
+
+    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
+
+      @Override
+      public Integer answer(InvocationOnMock invocation) throws Throwable {
+        StreamConsumer outConsumer = (StreamConsumer) invocation.getArguments()[1];
+        outConsumer.consumeLine("Problem running 'annotate':");
+        outConsumer.consumeLine("No remote versionable found for \"/tmp/b/dummy-git/src/testfile\". Try 'lscm help annotate' for more information.");
+        return 1;
+      }
+    });
+    
+    when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    
+    verifyZeroInteractions(result);
+  }
+  
+  
+  /**
+   * Differs from {@link testUntrackedFile} because it is an untracked file that is outside of the shared
+   * directories.
+   */
+  @Test
+  public void testUntrackedExternalFile() throws IOException {
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
+
+    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
+
+      @Override
+      public Integer answer(InvocationOnMock invocation) throws Throwable {
+        StreamConsumer outConsumer = (StreamConsumer) invocation.getArguments()[1];
+        outConsumer.consumeLine("Problem running 'annotate':");
+        outConsumer.consumeLine("\"src/foo.xoo\" is not shared.");
+        return 30;
+      }
+    });
+    
+    when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    
+    verifyZeroInteractions(result);
+  }
+  
+  /**
+   * Tested with <pre>lscm annotate -u invalid -P invalid pom.xml</pre>
+   */
+  @Test(expected = IllegalStateException.class)
+  public void testInvalidCredentials() throws IOException {
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
+
+    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
+
+      @Override
+      public Integer answer(InvocationOnMock invocation) throws Throwable {
+        StreamConsumer outConsumer = (StreamConsumer) invocation.getArguments()[1];
+        outConsumer.consumeLine("Problem running 'annotate':");
+        outConsumer.consumeLine("Could not log in to https://localhost:9443/ccm/ as user invalid: CRJAZ0124E The user name or password is invalid.");
+        outConsumer.consumeLine("CRJAZ0124E The user name or password is invalid.");
+        outConsumer.consumeLine("Check the log for details about the error at \"/home/user/.jazz-scm\". If you have configured custom logging check your log configuration settings for the path to the log file.");
+        return 2;
+      }
+    });
+    
+    when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    
+    verifyZeroInteractions(result);
+  }
 
   @Test
   public void testAddMissingLastLine() throws IOException {
-    File source = new File(baseDir, "src/foo.xoo");
-    FileUtils.write(source, "sample content");
-    DefaultInputFile inputFile = new DefaultInputFile("foo", "src/foo.xoo").setLines(4).setAbsolutePath(new File(baseDir, "src/foo.xoo").getAbsolutePath());
-    fs.add(inputFile);
-
-    BlameOutput result = mock(BlameOutput.class);
-    CommandExecutor commandExecutor = mock(CommandExecutor.class);
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 4);
 
     when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
 
@@ -165,5 +264,4 @@ public class JazzRtcBlameCommandTest {
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
   }
-
 }
