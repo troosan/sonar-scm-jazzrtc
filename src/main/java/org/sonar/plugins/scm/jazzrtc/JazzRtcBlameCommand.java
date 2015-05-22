@@ -38,7 +38,7 @@ import org.sonar.api.utils.command.StringStreamConsumer;
 public class JazzRtcBlameCommand extends BlameCommand {
 
   private static final Logger LOG = LoggerFactory.getLogger(JazzRtcBlameCommand.class);
-  private static final int[] UNTRACKED_BLAME_RETURN_CODES = { 1, 3, 30 };
+  private static final int[] UNTRACKED_BLAME_RETURN_CODES = {1, 3, 30};
   private final CommandExecutor commandExecutor;
   private final JazzRtcConfiguration config;
 
@@ -69,11 +69,10 @@ public class JazzRtcBlameCommand extends BlameCommand {
 
     int exitCode = execute(cl, consumer, stderr);
     if (exitCode != 0) {
-      if(ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
-        //skips file silently
+      if (ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
+        LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
         return;
-      }
-      else {
+      } else {
         throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] failed: " + stderr.getOutput());
       }
     }
