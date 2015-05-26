@@ -36,6 +36,7 @@ import java.util.List;
 public class JazzRtcConfiguration implements BatchComponent {
 
   private static final String CATEGORY_JAZZ = "Jazz RTC";
+  private static final long CMD_TIMEOUT = 60_000;
   public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
   public static final String PASSWORD_PROP_KEY = "sonar.jazzrtc.password.secured";
 
@@ -75,6 +76,10 @@ public class JazzRtcConfiguration implements BatchComponent {
   @CheckForNull
   public String password() {
     return settings.getString(PASSWORD_PROP_KEY);
+  }
+  
+  public long commandTimeout() {
+    return CMD_TIMEOUT;
   }
 
 }

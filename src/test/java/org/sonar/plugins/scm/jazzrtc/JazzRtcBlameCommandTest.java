@@ -46,8 +46,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.eq;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -57,13 +59,13 @@ import static org.mockito.Mockito.when;
 public class JazzRtcBlameCommandTest {
   @Mock
   private BlameOutput result;
-  
+
   @Mock
   private CommandExecutor commandExecutor;
-  
+
   @Mock
   private BlameInput input;
-  
+
   @Rule
   public UTCRule utcRule = new UTCRule();
 
@@ -75,17 +77,17 @@ public class JazzRtcBlameCommandTest {
 
   private DefaultFileSystem fs;
   private File baseDir;
-  
+
   @Before
   public void prepare() throws IOException {
     MockitoAnnotations.initMocks(this);
-    
+
     baseDir = temp.newFolder();
     fs = new DefaultFileSystem();
     fs.setBaseDir(baseDir);
     when(input.fileSystem()).thenReturn(fs);
   }
-  
+
   private DefaultInputFile createTestFile(String filePath, int numLines) throws IOException {
     File source = new File(baseDir, filePath);
     FileUtils.write(source, "sample content");
@@ -118,6 +120,38 @@ public class JazzRtcBlameCommandTest {
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
   }
 
+  /**
+   * Assuming that CommandExecutor times out, tests if we break execution immediately with a IllegalStateException and that the timeout in the config is
+   * passed to the executor.
+   */
+  @Test
+  public void testCommandTimeout() throws IOException {
+    long testTimeout = 100l;
+
+    JazzRtcConfiguration mockedConfig = mock(JazzRtcConfiguration.class);
+    when(mockedConfig.commandTimeout()).thenReturn(testTimeout);
+
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
+
+    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
+
+      @Override
+      public Integer answer(InvocationOnMock invocation) throws Throwable {
+        throw new TimeoutException(null, null, null);
+      }
+    });
+
+    when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
+    try {
+      new JazzRtcBlameCommand(commandExecutor, mockedConfig).blame(input, result);
+      fail("expected exception");
+    } catch (IllegalStateException e) {
+      // expected
+    }
+
+    verify(commandExecutor).execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), eq(testTimeout));
+  }
+
   @Test
   public void testParsingOfOutputWithWrappedCode() throws IOException {
     DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
@@ -142,7 +176,7 @@ public class JazzRtcBlameCommandTest {
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
   }
-  
+
   @Test
   public void testUntrackedFile() throws IOException {
     DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
@@ -155,17 +189,18 @@ public class JazzRtcBlameCommandTest {
         outConsumer.consumeLine("Problem running 'annotate':");
         outConsumer.consumeLine("Annotate failed.");
         outConsumer.consumeLine("failed to find the given file state starting with the given change set in the current configuration");
-        outConsumer.consumeLine("Check the log for details about the error at \"/home/user/.jazz-scm\". If you have configured custom logging check your log configuration settings for the path to the log file.");
+        outConsumer
+          .consumeLine("Check the log for details about the error at \"/home/user/.jazz-scm\". If you have configured custom logging check your log configuration settings for the path to the log file.");
         return 3;
       }
     });
-    
+
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
     new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
-    
+
     verifyZeroInteractions(result);
   }
-  
+
   @Test
   public void testUntrackedFile2() throws IOException {
     DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
@@ -180,14 +215,13 @@ public class JazzRtcBlameCommandTest {
         return 1;
       }
     });
-    
+
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
     new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
-    
+
     verifyZeroInteractions(result);
   }
-  
-  
+
   /**
    * Differs from {@link testUntrackedFile} because it is an untracked file that is outside of the shared
    * directories.
@@ -206,13 +240,13 @@ public class JazzRtcBlameCommandTest {
         return 30;
       }
     });
-    
+
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
     new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
-    
+
     verifyZeroInteractions(result);
   }
-  
+
   /**
    * Tested with <pre>lscm annotate -u invalid -P invalid pom.xml</pre>
    */
@@ -228,14 +262,15 @@ public class JazzRtcBlameCommandTest {
         outConsumer.consumeLine("Problem running 'annotate':");
         outConsumer.consumeLine("Could not log in to https://localhost:9443/ccm/ as user invalid: CRJAZ0124E The user name or password is invalid.");
         outConsumer.consumeLine("CRJAZ0124E The user name or password is invalid.");
-        outConsumer.consumeLine("Check the log for details about the error at \"/home/user/.jazz-scm\". If you have configured custom logging check your log configuration settings for the path to the log file.");
+        outConsumer
+          .consumeLine("Check the log for details about the error at \"/home/user/.jazz-scm\". If you have configured custom logging check your log configuration settings for the path to the log file.");
         return 2;
       }
     });
-    
+
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
     new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
-    
+
     verifyZeroInteractions(result);
   }
 
