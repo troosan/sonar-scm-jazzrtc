@@ -19,8 +19,11 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import java.io.File;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
@@ -35,6 +38,7 @@ import org.sonar.api.utils.command.StringStreamConsumer;
 public class JazzRtcBlameCommand extends BlameCommand {
 
   private static final Logger LOG = LoggerFactory.getLogger(JazzRtcBlameCommand.class);
+  private static final int[] UNTRACKED_BLAME_RETURN_CODES = {1, 3, 30};
   private final CommandExecutor commandExecutor;
   private final JazzRtcConfiguration config;
 
@@ -65,11 +69,17 @@ public class JazzRtcBlameCommand extends BlameCommand {
 
     int exitCode = execute(cl, consumer, stderr);
     if (exitCode != 0) {
-      throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] failed: " + stderr.getOutput());
+      if (ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
+        LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
+        return;
+      } else {
+        throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] failed: " + stderr.getOutput());
+      }
     }
+
     List<BlameLine> lines = consumer.getLines();
     if (lines.size() == inputFile.lines() - 1) {
-      // SONARPLUGINS-3097 JazzRTC do not report blame on last empty line
+      // SONARPLUGINS-3097 JazzRTC does not report blame on last empty line
       lines.add(lines.get(lines.size() - 1));
     }
     output.blameResult(inputFile, lines);
