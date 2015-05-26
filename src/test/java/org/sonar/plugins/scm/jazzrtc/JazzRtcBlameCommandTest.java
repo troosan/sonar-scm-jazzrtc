@@ -133,13 +133,7 @@ public class JazzRtcBlameCommandTest {
 
     DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
 
-    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenAnswer(new Answer<Integer>() {
-
-      @Override
-      public Integer answer(InvocationOnMock invocation) throws Throwable {
-        throw new TimeoutException(null, null, null);
-      }
-    });
+    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenThrow(new TimeoutException(null, null, null));
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
     try {
