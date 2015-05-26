@@ -69,20 +69,12 @@ public class JazzRtcBlameCommand extends BlameCommand {
     JazzRtcBlameConsumer consumer = new JazzRtcBlameConsumer(filename);
     StringStreamConsumer stderr = new StringStreamConsumer();
 
-    try {
-      int exitCode = execute(cl, consumer, stderr);
-      if (ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
-        LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
-        return;
-      } else if (exitCode != 0) {
-        throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] failed: " + stderr.getOutput());
-      }
-    } catch (TimeoutException t) {
-      if (config.username() != null && config.password() != null) {
-        throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] timed out");
-      } else {
-        throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] timed out. Please check if you are logged in or provide username and password");
-      }
+    int exitCode = execute(cl, consumer, stderr);
+    if (ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
+      LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
+      return;
+    } else if (exitCode != 0) {
+      throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] failed: " + stderr.getOutput());
     }
 
     List<BlameLine> lines = consumer.getLines();
@@ -95,7 +87,18 @@ public class JazzRtcBlameCommand extends BlameCommand {
 
   public int execute(Command cl, StreamConsumer consumer, StreamConsumer stderr) {
     LOG.debug("Executing: " + cl);
-    return commandExecutor.execute(cl, consumer, stderr, config.commandTimeout());
+
+    try {
+      return commandExecutor.execute(cl, consumer, stderr, config.commandTimeout());
+    } catch (TimeoutException t) {
+      String errorMsg = "The jazz annotate command [" + cl.toString() + "] timed out";
+
+      if (config.username() != null && config.password() != null) {
+        throw new IllegalStateException(errorMsg, t);
+      } else {
+        throw new IllegalStateException(errorMsg + ". Please check if you are logged in or provide username and password", t);
+      }
+    }
   }
 
   private Command createCommandLine(File workingDirectory, String filename) {
