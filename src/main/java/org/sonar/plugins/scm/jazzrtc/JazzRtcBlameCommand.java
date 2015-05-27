@@ -19,13 +19,9 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import org.sonar.api.utils.command.TimeoutException;
-
-import org.apache.commons.lang.ArrayUtils;
-
 import java.io.File;
 import java.util.List;
-
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
@@ -36,6 +32,7 @@ import org.sonar.api.utils.command.Command;
 import org.sonar.api.utils.command.CommandExecutor;
 import org.sonar.api.utils.command.StreamConsumer;
 import org.sonar.api.utils.command.StringStreamConsumer;
+import org.sonar.api.utils.command.TimeoutException;
 
 public class JazzRtcBlameCommand extends BlameCommand {
 
@@ -103,6 +100,7 @@ public class JazzRtcBlameCommand extends BlameCommand {
 
   private Command createCommandLine(File workingDirectory, String filename) {
     Command cl = Command.create("lscm");
+    cl.setNewShell(true);
     cl.setDirectory(workingDirectory);
     cl.addArgument("annotate");
     String username = config.username();
