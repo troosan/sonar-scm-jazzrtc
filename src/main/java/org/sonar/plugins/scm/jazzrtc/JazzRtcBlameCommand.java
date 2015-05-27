@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
+import org.sonar.api.utils.command.TimeoutException;
+
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.File;
@@ -68,13 +70,11 @@ public class JazzRtcBlameCommand extends BlameCommand {
     StringStreamConsumer stderr = new StringStreamConsumer();
 
     int exitCode = execute(cl, consumer, stderr);
-    if (exitCode != 0) {
-      if (ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
-        LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
-        return;
-      } else {
-        throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] failed: " + stderr.getOutput());
-      }
+    if (ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
+      LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
+      return;
+    } else if (exitCode != 0) {
+      throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] failed: " + stderr.getOutput());
     }
 
     List<BlameLine> lines = consumer.getLines();
@@ -87,7 +87,18 @@ public class JazzRtcBlameCommand extends BlameCommand {
 
   public int execute(Command cl, StreamConsumer consumer, StreamConsumer stderr) {
     LOG.debug("Executing: " + cl);
-    return commandExecutor.execute(cl, consumer, stderr, -1);
+
+    try {
+      return commandExecutor.execute(cl, consumer, stderr, config.commandTimeout());
+    } catch (TimeoutException t) {
+      String errorMsg = "The jazz annotate command [" + cl.toString() + "] timed out";
+
+      if (config.username() != null && config.password() != null) {
+        throw new IllegalStateException(errorMsg, t);
+      } else {
+        throw new IllegalStateException(errorMsg + ". Please check if you are logged in or provide username and password", t);
+      }
+    }
   }
 
   private Command createCommandLine(File workingDirectory, String filename) {
