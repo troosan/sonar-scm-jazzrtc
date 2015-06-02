@@ -43,7 +43,7 @@ public class JazzRtcBlameConsumer implements StreamConsumer {
   // 1 Julien HENRY (1008) 2011-12-14 09:14 AM Test.txt
   // 2 Julien HENRY (1005) 2011-12-14 09:14 AM My commit comment.
 
-  private static final String LINE_PATTERN = "(\\d+)\\s+(.*) \\((\\d+)\\) (\\d+-\\d+-\\d+ \\d+\\:\\d+ (AM|PM)) (.*)";
+  private static final String LINE_PATTERN = "(\\d+)\\s+(.*?)\\s+\\((\\d+)\\) (\\d+-\\d+-\\d+ \\d+\\:\\d+ (AM|PM)) (.*)";
 
   private List<BlameLine> lines = new ArrayList<BlameLine>();
 

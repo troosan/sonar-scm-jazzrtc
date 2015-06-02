@@ -37,7 +37,7 @@ public class JazzRtcBlameConsumerTest {
     "10 Duarte (1058) 2015-05-29 11:23 AM  Share  * ",
     "11 Duarte (1058) 2015-05-29 11:23 AM  Share  * Sonar is distributed in the hope that it will be useful, ",
     "12 Duarte (1058) 2015-05-29 11:23 AM  Share  * but WITHOUT ANY WARRANTY; without even the implied warranty of ",
-    "13 Duarte (1058) 2015-05-29 11:23 AM  Share  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU "
+    "13 Duarte    (1058) 2015-05-29 11:23 AM  Share  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU "
   };
 
   @Test
