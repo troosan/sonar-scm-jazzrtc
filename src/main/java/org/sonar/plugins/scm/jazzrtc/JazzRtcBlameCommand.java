@@ -100,7 +100,6 @@ public class JazzRtcBlameCommand extends BlameCommand {
 
   private Command createCommandLine(File workingDirectory, String filename) {
     Command cl = Command.create("lscm");
-    cl.setNewShell(true);
     cl.setDirectory(workingDirectory);
     cl.addArgument("annotate");
     String username = config.username();
