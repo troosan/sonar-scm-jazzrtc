@@ -19,8 +19,11 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
+import org.sonar.api.utils.System2;
+
 import java.io.File;
 import java.util.List;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +43,20 @@ public class JazzRtcBlameCommand extends BlameCommand {
   private static final int[] UNTRACKED_BLAME_RETURN_CODES = {1, 3, 30};
   private final CommandExecutor commandExecutor;
   private final JazzRtcConfiguration config;
+  private final System2 system;
 
   public JazzRtcBlameCommand(JazzRtcConfiguration configuration) {
     this(CommandExecutor.create(), configuration);
   }
 
   JazzRtcBlameCommand(CommandExecutor commandExecutor, JazzRtcConfiguration configuration) {
+    this(commandExecutor, configuration, System2.INSTANCE);
+  }
+  
+  JazzRtcBlameCommand(CommandExecutor commandExecutor, JazzRtcConfiguration configuration, System2 system) {
     this.commandExecutor = commandExecutor;
     this.config = configuration;
+    this.system = system;
   }
 
   @Override
@@ -100,6 +109,10 @@ public class JazzRtcBlameCommand extends BlameCommand {
 
   private Command createCommandLine(File workingDirectory, String filename) {
     Command cl = Command.create("lscm");
+    // SONARSCRTC-3 and SONARSCRTC-6
+    if(system.isOsWindows()) {
+      cl.setNewShell(true);
+    }
     cl.setDirectory(workingDirectory);
     cl.addArgument("annotate");
     String username = config.username();

@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
+import org.mockito.ArgumentCaptor;
+import org.sonar.api.utils.System2;
 import org.sonar.api.utils.command.TimeoutException;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Mock;
@@ -46,8 +48,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.mockito.Matchers.eq;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.mockito.Matchers.eq;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -144,6 +147,25 @@ public class JazzRtcBlameCommandTest {
     }
 
     verify(commandExecutor).execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), eq(testTimeout));
+  }
+
+  @Test
+  // SONARSCRTC-3 and SONARSCRTC-6
+  public void testNewShellOnWindows() throws IOException {
+    System2 system = mock(System2.class);
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
+
+    when(system.isOsWindows()).thenReturn(true);
+    when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
+    JazzRtcConfiguration mockedConfig = mock(JazzRtcConfiguration.class);
+    new JazzRtcBlameCommand(commandExecutor, mockedConfig, system).blame(input, result);
+
+    ArgumentCaptor<Command> argument = ArgumentCaptor.forClass(Command.class);
+    verify(commandExecutor).execute(argument.capture(), any(StreamConsumer.class), any(StreamConsumer.class), anyLong());
+    Command command = argument.getValue();
+
+    assertThat(command.isNewShell()).isTrue();
+
   }
 
   @Test
