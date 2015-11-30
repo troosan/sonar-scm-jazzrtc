@@ -37,9 +37,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:SonarCommunity/sonar-scm-jazzrtc.git</connection>
-    <developerConnection>scm:git:git@github.com:SonarCommunity/sonar-scm-jazzrtc.git</developerConnection>
-    <url>https://github.com/SonarCommunity/sonar-scm-jazzrtc</url>
+    <connection>scm:git:git@github.com:SonarSource/sonar-scm-jazzrtc.git</connection>
+    <developerConnection>scm:git:git@github.com:SonarSource/sonar-scm-jazzrtc.git</developerConnection>
+    <url>https://github.com/SonarSource/sonar-scm-jazzrtc</url>
     <tag>HEAD</tag>
   </scm>
   
