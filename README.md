@@ -1,7 +1,7 @@
 SonarQube Jazz RTC SCM Plugin
 =============================
 
-[![Build Status](https://travis-ci.org/SonarCommunity/sonar-scm-jazzrtc.svg?branch=master)](https://travis-ci.org/SonarCommunity/sonar-scm-jazzrtc)
+[![Build Status](https://travis-ci.org/SonarSource/sonar-scm-jazzrtc.svg?branch=master)](https://travis-ci.org/SonarSource/sonar-scm-jazzrtc)
 
 https://jazz.net/products/rational-team-concert/
 
