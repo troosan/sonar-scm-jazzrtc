@@ -57,6 +57,7 @@
     <sonar.buildVersion>5.0</sonar.buildVersion>
     <sonar.pluginName>Jazz RTC</sonar.pluginName>
     <sonar.pluginClass>org.sonar.plugins.scm.jazzrtc.JazzRtcPlugin</sonar.pluginClass>
+    <gitRepositoryName>sonar-scm-jazzrtc</gitRepositoryName>
   </properties>
 
   <dependencies>
