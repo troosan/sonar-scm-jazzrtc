@@ -38,21 +38,16 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:SonarSource/sonar-scm-jazzrtc.git</connection>
-    <developerConnection>scm:git:git@github.com:SonarSource/sonar-scm-jazzrtc.git</developerConnection>
-    <url>https://github.com/SonarSource/sonar-scm-jazzrtc</url>
+    <connection>scm:git:git@github.com:SonarQubeCommunity/sonar-scm-jazzrtc.git</connection>
+    <developerConnection>scm:git:git@github.com:SonarQubeCommunity/sonar-scm-jazzrtc.git</developerConnection>
+    <url>https://github.com/SonarQubeCommunity/sonar-scm-jazzrtc</url>
     <tag>HEAD</tag>
   </scm>
   
   <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/SONARSCRTC</url>
+    <system>GitHub Issues</system>
+    <url>https://github.com/SonarQubeCommunity/sonar-scm-jazzrtc/issues</url>
   </issueManagement>
-  
-  <ciManagement>
-    <system>Cloudbees</system>
-    <url>https://sonarplugins.ci.cloudbees.com/job/scm-jazzrtc/</url>
-  </ciManagement>
 
   <properties>
     <sonar.buildVersion>5.0</sonar.buildVersion>
