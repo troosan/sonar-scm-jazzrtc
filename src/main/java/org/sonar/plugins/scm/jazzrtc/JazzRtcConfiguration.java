@@ -39,6 +39,7 @@ public class JazzRtcConfiguration {
   public static final long CMD_DEFAULT_TIMEOUT = 60_000;
   public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
   public static final String PASSWRD_PROP_KEY = "sonar.jazzrtc.password.secured";
+  public static final String PASSWRD_FILE_PROP_KEY = "sonar.jazzrtc.password.file";
 
   private final Configuration settings;
 
@@ -75,6 +76,15 @@ public class JazzRtcConfiguration {
         .category(CoreProperties.CATEGORY_SCM)
         .subCategory(CATEGORY_JAZZ)
         .index(2)
+        .build(),
+    PropertyDefinition.builder(PASSWRD_FILE_PROP_KEY)
+        .name("Password File")
+        .description("Password file to be used for Jazz RTC authentication")
+        .type(PropertyType.STRING)
+        .onQualifiers(Qualifiers.PROJECT)
+        .category(CoreProperties.CATEGORY_SCM)
+        .subCategory(CATEGORY_JAZZ)
+        .index(2)
         .build());
   }
 
@@ -86,6 +96,11 @@ public class JazzRtcConfiguration {
   @CheckForNull
   public String password() {
     return settings.get(PASSWRD_PROP_KEY).orElse(null);
+  }
+
+  @CheckForNull
+  public String passwordFile() {
+    return settings.get(PASSWRD_FILE_PROP_KEY).orElse(null);
   }
 
   public long commandTimeout() {

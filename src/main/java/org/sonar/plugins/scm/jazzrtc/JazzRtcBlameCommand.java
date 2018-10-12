@@ -105,7 +105,7 @@ public class JazzRtcBlameCommand extends BlameCommand {
     } catch (TimeoutException t) {
       String errorMsg = "The jazz annotate command [" + cl.toString() + "] timed out";
 
-      if (config.username() != null && config.password() != null) {
+      if (config.username() != null && (config.password() != null || config.passwordFile() != null)) {
         throw new IllegalStateException(errorMsg, t);
       } else {
         throw new IllegalStateException(errorMsg + ". Please check if you are logged in or provide username and password", t);
@@ -130,6 +130,11 @@ public class JazzRtcBlameCommand extends BlameCommand {
     if (password != null) {
       cl.addArgument("-P");
       cl.addMaskedArgument(password);
+    }
+    String passwordFile = config.passwordFile();
+    if (passwordFile != null) {
+      cl.addArgument("--password-file");
+      cl.addArgument(passwordFile);
     }
     cl.addArgument(filename);
     return cl;
