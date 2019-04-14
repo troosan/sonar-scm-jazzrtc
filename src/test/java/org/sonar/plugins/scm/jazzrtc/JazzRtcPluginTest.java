@@ -27,6 +27,6 @@ public class JazzRtcPluginTest {
 
   @Test
   public void getExtensions() {
-    assertThat(new JazzRtcPlugin().getExtensions()).hasSize(5);
+    assertThat(new JazzRtcPlugin().getExtensions()).hasSize(6);
   }
 }
