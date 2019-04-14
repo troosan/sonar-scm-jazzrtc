@@ -70,6 +70,7 @@ public class JazzRtcConfiguration implements BatchComponent {
         .name("CMD Timeout")
         .description("Timeout to be used for Jazz RTC Annotate command")
         .type(PropertyType.INTEGER)
+        .defaultValue("60000")
         .onQualifiers(Qualifiers.PROJECT)
         .category(CoreProperties.CATEGORY_SCM)
         .subCategory(CATEGORY_JAZZ)
