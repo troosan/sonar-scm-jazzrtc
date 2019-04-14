@@ -35,18 +35,18 @@ import java.util.List;
 @InstantiationStrategy(InstantiationStrategy.PER_BATCH)
 public class JazzRtcConfiguration implements BatchComponent {
 
-  private static final String CATEGORY_JAZZ = "Jazz RTC";
-  private static final long CMD_TIMEOUT = 60_000;
-  public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
-  public static final String PASSWORD_PROP_KEY = "sonar.jazzrtc.password.secured";
+	private static final String CATEGORY_JAZZ = "Jazz RTC";
+	public static final String CMD_TIMEOUT = "sonar.jazzrtc.cmd.timeout";
+	public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
+	public static final String PASSWORD_PROP_KEY = "sonar.jazzrtc.password.secured";
 
-  private final Settings settings;
+	private final Settings settings;
 
-  public JazzRtcConfiguration(Settings settings) {
-    this.settings = settings;
-  }
+	public JazzRtcConfiguration(Settings settings) {
+		this.settings = settings;
+	}
 
-  public static List<PropertyDefinition> getProperties() {
+	public static List<PropertyDefinition> getProperties() {
     return ImmutableList.of(
       PropertyDefinition.builder(USER_PROP_KEY)
         .name("Username")
@@ -65,21 +65,36 @@ public class JazzRtcConfiguration implements BatchComponent {
         .category(CoreProperties.CATEGORY_SCM)
         .subCategory(CATEGORY_JAZZ)
         .index(1)
+        .build(),
+      PropertyDefinition.builder(CMD_TIMEOUT)
+        .name("CMD Timeout")
+        .description("Timeout to be used for Jazz RTC Annotate command")
+        .type(PropertyType.INTEGER)
+        .onQualifiers(Qualifiers.PROJECT)
+        .category(CoreProperties.CATEGORY_SCM)
+        .subCategory(CATEGORY_JAZZ)
+        .index(2)
         .build());
   }
 
-  @CheckForNull
-  public String username() {
-    return settings.getString(USER_PROP_KEY);
-  }
+	@CheckForNull
+	public String username() {
+		return settings.getString(USER_PROP_KEY);
+	}
 
-  @CheckForNull
-  public String password() {
-    return settings.getString(PASSWORD_PROP_KEY);
-  }
-  
-  public long commandTimeout() {
-    return CMD_TIMEOUT;
-  }
+	@CheckForNull
+	public String password() {
+		return settings.getString(PASSWORD_PROP_KEY);
+	}
+
+	public long commandTimeout() {
+		long defaultCommandTimeout = 60_000;
+		int alternativeCommandTimeout = settings.getInt(CMD_TIMEOUT);
+		
+		if(alternativeCommandTimeout != 0)
+			defaultCommandTimeout = alternativeCommandTimeout;
+		
+		return defaultCommandTimeout;
+	}
 
 }

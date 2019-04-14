@@ -108,7 +108,7 @@ public class JazzRtcBlameCommand extends BlameCommand {
   }
 
   private Command createCommandLine(File workingDirectory, String filename) {
-    Command cl = Command.create("lscm");
+    Command cl = Command.create("fec");
     // SONARSCRTC-3 and SONARSCRTC-6
     if(system.isOsWindows()) {
       cl.setNewShell(true);
