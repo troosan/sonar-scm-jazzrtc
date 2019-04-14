@@ -19,17 +19,29 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import org.mockito.ArgumentCaptor;
-import org.sonar.api.utils.System2;
-import org.sonar.api.utils.command.TimeoutException;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Mock;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.sonar.api.batch.fs.InputFile;
@@ -40,24 +52,11 @@ import org.sonar.api.batch.scm.BlameCommand.BlameOutput;
 import org.sonar.api.batch.scm.BlameLine;
 import org.sonar.api.config.Settings;
 import org.sonar.api.utils.DateUtils;
+import org.sonar.api.utils.System2;
 import org.sonar.api.utils.command.Command;
 import org.sonar.api.utils.command.CommandExecutor;
 import org.sonar.api.utils.command.StreamConsumer;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.mockito.Matchers.eq;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.sonar.api.utils.command.TimeoutException;
 
 public class JazzRtcBlameCommandTest {
   @Mock
@@ -86,15 +85,14 @@ public class JazzRtcBlameCommandTest {
     MockitoAnnotations.initMocks(this);
 
     baseDir = temp.newFolder();
-    fs = new DefaultFileSystem();
-    fs.setBaseDir(baseDir);
+    fs = new DefaultFileSystem(baseDir);
     when(input.fileSystem()).thenReturn(fs);
   }
 
   private DefaultInputFile createTestFile(String filePath, int numLines) throws IOException {
     File source = new File(baseDir, filePath);
     FileUtils.write(source, "sample content");
-    DefaultInputFile inputFile = new DefaultInputFile("foo", filePath).setLines(numLines).setAbsolutePath(new File(baseDir, filePath).getAbsolutePath());
+    DefaultInputFile inputFile = new DefaultInputFile("foo", filePath).setLines(numLines);
     fs.add(inputFile);
     return inputFile;
   }

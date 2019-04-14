@@ -20,6 +20,7 @@
 package org.sonar.plugins.scm.jazzrtc;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
@@ -65,23 +66,8 @@ public class JazzRtcConfiguration implements BatchComponent {
 				.defaultValue("60000").onQualifiers(Qualifiers.PROJECT).category(CoreProperties.CATEGORY_SCM)
 				.subCategory(CATEGORY_JAZZ).index(2).build());
 
-		return listPropertiesDefinition;
-		/*
-		 * return ImmutableList.of( PropertyDefinition.builder(USER_PROP_KEY)
-		 * .name("Username")
-		 * .description("Username to be used for Jazz RTC authentication")
-		 * .type(PropertyType.STRING) .onQualifiers(Qualifiers.PROJECT)
-		 * .category(CoreProperties.CATEGORY_SCM) .subCategory(CATEGORY_JAZZ) .index(0)
-		 * .build(), PropertyDefinition.builder(PASSWORD_PROP_KEY) .name("Password")
-		 * .description("Password to be used for Jazz RTC authentication")
-		 * .type(PropertyType.PASSWORD) .onQualifiers(Qualifiers.PROJECT)
-		 * .category(CoreProperties.CATEGORY_SCM) .subCategory(CATEGORY_JAZZ) .index(1)
-		 * .build(), PropertyDefinition.builder(CMD_TIMEOUT) .name("CMD Timeout")
-		 * .description("Timeout to be used for Jazz RTC Annotate command")
-		 * .type(PropertyType.INTEGER) .defaultValue("60000")
-		 * .onQualifiers(Qualifiers.PROJECT) .category(CoreProperties.CATEGORY_SCM)
-		 * .subCategory(CATEGORY_JAZZ) .index(2) .build());
-		 */
+		return Collections.unmodifiableList(listPropertiesDefinition);
+		
 	}
 
 	@CheckForNull

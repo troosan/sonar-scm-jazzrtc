@@ -19,8 +19,6 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import org.sonar.api.utils.System2;
-
 import java.io.File;
 import java.util.List;
 
@@ -31,6 +29,7 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.scm.BlameCommand;
 import org.sonar.api.batch.scm.BlameLine;
+import org.sonar.api.utils.System2;
 import org.sonar.api.utils.command.Command;
 import org.sonar.api.utils.command.CommandExecutor;
 import org.sonar.api.utils.command.StreamConsumer;
