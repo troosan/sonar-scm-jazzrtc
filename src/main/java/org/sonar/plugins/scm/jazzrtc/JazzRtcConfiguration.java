@@ -38,6 +38,7 @@ public class JazzRtcConfiguration implements BatchComponent {
 
 	private static final String CATEGORY_JAZZ = "Jazz RTC";
 	public static final String CMD_TIMEOUT = "sonar.jazzrtc.cmd.timeout";
+	public static final long CMD_DEFAULT_TIMEOUT = 60_000;
 	public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
 	public static final String PASSWORD_PROP_KEY = "sonar.jazzrtc.password.secured";
 
@@ -61,6 +62,7 @@ public class JazzRtcConfiguration implements BatchComponent {
 				.onQualifiers(Qualifiers.PROJECT).category(CoreProperties.CATEGORY_SCM).subCategory(CATEGORY_JAZZ)
 				.index(1).build());
 
+		// SONARSCRTC-9
 		listPropertiesDefinition.add(PropertyDefinition.builder(CMD_TIMEOUT).name("CMD Timeout")
 				.description("Timeout to be used for Jazz RTC Annotate command").type(PropertyType.INTEGER)
 				.defaultValue("60000").onQualifiers(Qualifiers.PROJECT).category(CoreProperties.CATEGORY_SCM)
@@ -81,13 +83,12 @@ public class JazzRtcConfiguration implements BatchComponent {
 	}
 
 	public long commandTimeout() {
-		long defaultCommandTimeout = 60_000;
 		int alternativeCommandTimeout = settings.getInt(CMD_TIMEOUT);
 
 		if (alternativeCommandTimeout != 0)
-			defaultCommandTimeout = alternativeCommandTimeout;
+			return alternativeCommandTimeout;
 
-		return defaultCommandTimeout;
+		return CMD_DEFAULT_TIMEOUT;
 	}
 
 }

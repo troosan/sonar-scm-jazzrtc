@@ -20,9 +20,9 @@
 package org.sonar.plugins.scm.jazzrtc;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
@@ -39,7 +39,7 @@ import org.sonar.api.utils.command.TimeoutException;
 public class JazzRtcBlameCommand extends BlameCommand {
 
   private static final Logger LOG = LoggerFactory.getLogger(JazzRtcBlameCommand.class);
-  private static final int[] UNTRACKED_BLAME_RETURN_CODES = {1, 3, 30};
+  private static final List<Integer> UNTRACKED_BLAME_RETURN_CODES = Arrays.asList(1, 3, 30);
   private final CommandExecutor commandExecutor;
   private final JazzRtcConfiguration config;
   private final System2 system;
@@ -75,7 +75,8 @@ public class JazzRtcBlameCommand extends BlameCommand {
     StringStreamConsumer stderr = new StringStreamConsumer();
 
     int exitCode = execute(cl, consumer, stderr);
-    if (ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
+    // SONARSCRTC-13
+    if (UNTRACKED_BLAME_RETURN_CODES.contains(exitCode)) {
       LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
       return;
     } else if (exitCode != 0) {
