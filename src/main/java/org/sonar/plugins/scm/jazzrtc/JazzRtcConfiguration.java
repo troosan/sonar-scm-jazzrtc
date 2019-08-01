@@ -19,35 +19,34 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import com.google.common.collect.ImmutableList;
-import org.sonar.api.BatchComponent;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.PropertyType;
-import org.sonar.api.batch.InstantiationStrategy;
+import org.sonar.api.batch.ScannerSide;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.config.Settings;
 import org.sonar.api.resources.Qualifiers;
 
 import javax.annotation.CheckForNull;
 
+import java.util.Arrays;
 import java.util.List;
 
-@InstantiationStrategy(InstantiationStrategy.PER_BATCH)
-public class JazzRtcConfiguration implements BatchComponent {
+@ScannerSide
+public class JazzRtcConfiguration {
 
   private static final String CATEGORY_JAZZ = "Jazz RTC";
   private static final long CMD_TIMEOUT = 60_000;
   public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
-  public static final String PASSWORD_PROP_KEY = "sonar.jazzrtc.password.secured";
+  public static final String PASSWRD_PROP_KEY = "sonar.jazzrtc.password.secured";
 
-  private final Settings settings;
+  private final Configuration settings;
 
-  public JazzRtcConfiguration(Settings settings) {
+  public JazzRtcConfiguration(Configuration settings) {
     this.settings = settings;
   }
 
   public static List<PropertyDefinition> getProperties() {
-    return ImmutableList.of(
+    return Arrays.asList(
       PropertyDefinition.builder(USER_PROP_KEY)
         .name("Username")
         .description("Username to be used for Jazz RTC authentication")
@@ -57,7 +56,7 @@ public class JazzRtcConfiguration implements BatchComponent {
         .subCategory(CATEGORY_JAZZ)
         .index(0)
         .build(),
-      PropertyDefinition.builder(PASSWORD_PROP_KEY)
+      PropertyDefinition.builder(PASSWRD_PROP_KEY)
         .name("Password")
         .description("Password to be used for Jazz RTC authentication")
         .type(PropertyType.PASSWORD)
@@ -70,14 +69,14 @@ public class JazzRtcConfiguration implements BatchComponent {
 
   @CheckForNull
   public String username() {
-    return settings.getString(USER_PROP_KEY);
+    return settings.get(USER_PROP_KEY).orElse(null);
   }
 
   @CheckForNull
   public String password() {
-    return settings.getString(PASSWORD_PROP_KEY);
+    return settings.get(PASSWRD_PROP_KEY).orElse(null);
   }
-  
+
   public long commandTimeout() {
     return CMD_TIMEOUT;
   }

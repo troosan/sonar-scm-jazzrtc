@@ -22,11 +22,9 @@ package org.sonar.plugins.scm.jazzrtc;
 import org.sonar.api.utils.System2;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.scm.BlameCommand;
@@ -36,11 +34,13 @@ import org.sonar.api.utils.command.CommandExecutor;
 import org.sonar.api.utils.command.StreamConsumer;
 import org.sonar.api.utils.command.StringStreamConsumer;
 import org.sonar.api.utils.command.TimeoutException;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 public class JazzRtcBlameCommand extends BlameCommand {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JazzRtcBlameCommand.class);
-  private static final int[] UNTRACKED_BLAME_RETURN_CODES = {1, 3, 30};
+  private static final Logger LOG = Loggers.get(JazzRtcBlameCommand.class);
+  private static final List<Integer> UNTRACKED_BLAME_RETURN_CODES = Arrays.asList(1, 3, 30);
   private final CommandExecutor commandExecutor;
   private final JazzRtcConfiguration config;
   private final System2 system;
@@ -52,7 +52,7 @@ public class JazzRtcBlameCommand extends BlameCommand {
   JazzRtcBlameCommand(CommandExecutor commandExecutor, JazzRtcConfiguration configuration) {
     this(commandExecutor, configuration, System2.INSTANCE);
   }
-  
+
   JazzRtcBlameCommand(CommandExecutor commandExecutor, JazzRtcConfiguration configuration, System2 system) {
     this.commandExecutor = commandExecutor;
     this.config = configuration;
@@ -70,13 +70,19 @@ public class JazzRtcBlameCommand extends BlameCommand {
   }
 
   private void blame(FileSystem fs, InputFile inputFile, BlameOutput output) {
-    String filename = inputFile.relativePath();
+    String filename;
+    if ("file".equals(inputFile.uri().getScheme())) {
+      filename = inputFile.uri().getSchemeSpecificPart().replace("//" + fs.baseDir() + "/", "");
+    } else {
+      LOG.warn("Could not get file location from uri, using toString instead");
+      filename = inputFile.toString();
+    }
     Command cl = createCommandLine(fs.baseDir(), filename);
     JazzRtcBlameConsumer consumer = new JazzRtcBlameConsumer(filename);
     StringStreamConsumer stderr = new StringStreamConsumer();
 
     int exitCode = execute(cl, consumer, stderr);
-    if (ArrayUtils.contains(UNTRACKED_BLAME_RETURN_CODES, exitCode)) {
+    if (UNTRACKED_BLAME_RETURN_CODES.contains(exitCode)) {
       LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
       return;
     } else if (exitCode != 0) {
