@@ -21,10 +21,10 @@ package org.sonar.plugins.scm.jazzrtc;
 
 import org.sonar.api.CoreProperties;
 import org.sonar.api.PropertyType;
-import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
+import org.sonar.api.scanner.ScannerSide;
 
 import javax.annotation.CheckForNull;
 
