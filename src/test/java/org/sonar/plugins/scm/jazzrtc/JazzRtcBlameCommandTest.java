@@ -95,6 +95,7 @@ public class JazzRtcBlameCommandTest {
     when(input.fileSystem()).thenReturn(fs);
     when(configuration.get(JazzRtcConfiguration.USER_PROP_KEY)).thenReturn(Optional.ofNullable("test_user"));
     when(configuration.get(JazzRtcConfiguration.PASSWRD_PROP_KEY)).thenReturn(Optional.ofNullable("test_pwd"));
+    when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.ofNullable(0L));
   }
 
   private DefaultInputFile createTestFile(String filePath, int numLines) throws IOException {
@@ -320,5 +321,24 @@ public class JazzRtcBlameCommandTest {
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
+  }
+
+  /**
+   * Tests that when the timeout is set to 0, it returns the default timeout
+   */
+  @Test
+  public void testDefaultTimeout() throws IOException {
+    when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.ofNullable(0L));
+    JazzRtcConfiguration rtcConfiguration = new JazzRtcConfiguration(configuration);
+
+    assertThat(rtcConfiguration.commandTimeout()).isEqualTo(60000L);
+  }
+
+  @Test
+  public void testCustomTimeout() throws IOException {
+    when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.ofNullable(1000L));
+    JazzRtcConfiguration rtcConfiguration = new JazzRtcConfiguration(configuration);
+    
+    assertThat(rtcConfiguration.commandTimeout()).isEqualTo(1000L);
   }
 }
