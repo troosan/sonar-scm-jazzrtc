@@ -16,6 +16,7 @@ You can also configure some optional properties:
 | --- | ----------- |
 | sonar.jazzrtc.username | Username to be used for Jazz RTC authentication |
 | sonar.jazzrtc.password.secured | Password to be used for Jazz RTC authentication |
+| sonar.jazzrtc.cmd.timeout | Timeout to be used for Jazz RTC Annotate command |
 
 ## Known Limitations
 * Blame is not executed in parallel since it is not supported by lscm annotate.

@@ -35,7 +35,8 @@ import java.util.List;
 public class JazzRtcConfiguration {
 
   private static final String CATEGORY_JAZZ = "Jazz RTC";
-  private static final long CMD_TIMEOUT = 60_000;
+  public static final String CMD_TIMEOUT_PROP_KEY = "sonar.jazzrtc.cmd.timeout";
+  public static final long CMD_DEFAULT_TIMEOUT = 60_000;
   public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
   public static final String PASSWRD_PROP_KEY = "sonar.jazzrtc.password.secured";
 
@@ -64,6 +65,16 @@ public class JazzRtcConfiguration {
         .category(CoreProperties.CATEGORY_SCM)
         .subCategory(CATEGORY_JAZZ)
         .index(1)
+        .build(),
+      PropertyDefinition.builder(CMD_TIMEOUT_PROP_KEY)
+        .name("CMD Timeout")
+        .description("Timeout to be used for Jazz RTC Annotate command")
+        .type(PropertyType.INTEGER)
+        .defaultValue("60000")
+        .onQualifiers(Qualifiers.PROJECT)
+        .category(CoreProperties.CATEGORY_SCM)
+        .subCategory(CATEGORY_JAZZ)
+        .index(2)
         .build());
   }
 
@@ -78,7 +89,7 @@ public class JazzRtcConfiguration {
   }
 
   public long commandTimeout() {
-    return CMD_TIMEOUT;
+    return settings.getLong(CMD_TIMEOUT_PROP_KEY).filter((Long t) -> t != 0L).orElse(CMD_DEFAULT_TIMEOUT);
   }
 
 }
