@@ -19,47 +19,52 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import org.mockito.ArgumentCaptor;
-import org.sonar.api.utils.System2;
-import org.sonar.api.utils.command.TimeoutException;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Mock;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Optional;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.scm.BlameCommand.BlameInput;
 import org.sonar.api.batch.scm.BlameCommand.BlameOutput;
 import org.sonar.api.batch.scm.BlameLine;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.DateUtils;
+import org.sonar.api.utils.System2;
 import org.sonar.api.utils.command.Command;
 import org.sonar.api.utils.command.CommandExecutor;
 import org.sonar.api.utils.command.StreamConsumer;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.mockito.Matchers.eq;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.sonar.api.utils.command.TimeoutException;
 
 public class JazzRtcBlameCommandTest {
+  @Mock
+  private Configuration configuration;
+
   @Mock
   private BlameOutput result;
 
@@ -86,15 +91,16 @@ public class JazzRtcBlameCommandTest {
     MockitoAnnotations.initMocks(this);
 
     baseDir = temp.newFolder();
-    fs = new DefaultFileSystem();
-    fs.setBaseDir(baseDir);
+    fs = new DefaultFileSystem(baseDir);
     when(input.fileSystem()).thenReturn(fs);
+    when(configuration.get(JazzRtcConfiguration.USER_PROP_KEY)).thenReturn(Optional.ofNullable("test_user"));
+    when(configuration.get(JazzRtcConfiguration.PASSWRD_PROP_KEY)).thenReturn(Optional.ofNullable("test_pwd"));
   }
 
   private DefaultInputFile createTestFile(String filePath, int numLines) throws IOException {
     File source = new File(baseDir, filePath);
-    FileUtils.write(source, "sample content");
-    DefaultInputFile inputFile = new DefaultInputFile("foo", filePath).setLines(numLines).setAbsolutePath(new File(baseDir, filePath).getAbsolutePath());
+    FileUtils.write(source, "sample content", Charset.defaultCharset());
+    DefaultInputFile inputFile = new TestInputFileBuilder(baseDir.getAbsolutePath(), filePath).setLines(numLines).build();
     fs.add(inputFile);
     return inputFile;
   }
@@ -116,7 +122,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
     verify(result).blameResult(inputFile,
       Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
@@ -186,7 +192,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
     verify(result).blameResult(inputFile,
       Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
@@ -212,7 +218,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
 
     verifyZeroInteractions(result);
   }
@@ -233,7 +239,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
 
     verifyZeroInteractions(result);
   }
@@ -258,7 +264,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
 
     verifyZeroInteractions(result);
   }
@@ -285,7 +291,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
 
     verifyZeroInteractions(result);
   }
@@ -308,7 +314,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
     verify(result).blameResult(inputFile,
       Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),

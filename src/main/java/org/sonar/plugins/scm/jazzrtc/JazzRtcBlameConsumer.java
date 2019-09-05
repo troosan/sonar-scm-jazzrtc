@@ -19,10 +19,10 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.scm.BlameLine;
 import org.sonar.api.utils.command.StreamConsumer;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 
 public class JazzRtcBlameConsumer implements StreamConsumer {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JazzRtcBlameConsumer.class);
+  private static final Logger LOG = Loggers.get(JazzRtcBlameConsumer.class);
 
   private static final String JAZZ_TIMESTAMP_PATTERN = "yyyy-MM-dd hh:mm a";
 
@@ -45,7 +45,7 @@ public class JazzRtcBlameConsumer implements StreamConsumer {
 
   private static final String LINE_PATTERN = "(\\d+)\\s+(.*?)\\s+\\((\\d+)\\) (\\d+-\\d+-\\d+ \\d+\\:\\d+ (AM|PM)) (.*)";
 
-  private List<BlameLine> lines = new ArrayList<BlameLine>();
+  private List<BlameLine> lines = new ArrayList<>();
 
   private DateFormat format;
 
