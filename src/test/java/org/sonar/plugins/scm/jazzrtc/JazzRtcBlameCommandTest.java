@@ -234,7 +234,7 @@ public class JazzRtcBlameCommandTest {
       public Integer answer(InvocationOnMock invocation) throws Throwable {
         StreamConsumer outConsumer = (StreamConsumer) invocation.getArguments()[1];
         outConsumer.consumeLine("Problem running 'annotate':");
-        outConsumer.consumeLine("No remote versionable found for \"/tmp/b/dummy-git/src/testfile\". Try 'fec help annotate' for more information.");
+        outConsumer.consumeLine("No remote versionable found for \"/tmp/b/dummy-git/src/testfile\". Try 'lscm help annotate' for more information.");
         return 1;
       }
     });
@@ -271,7 +271,7 @@ public class JazzRtcBlameCommandTest {
   }
 
   /**
-   * Tested with <pre>fec annotate -u invalid -P invalid pom.xml</pre>
+   * Tested with <pre>lscm annotate -u invalid -P invalid pom.xml</pre>
    */
   @Test(expected = IllegalStateException.class)
   public void testInvalidCredentials() throws IOException {
