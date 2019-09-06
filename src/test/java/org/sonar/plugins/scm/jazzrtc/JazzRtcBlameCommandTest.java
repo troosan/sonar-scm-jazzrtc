@@ -338,7 +338,7 @@ public class JazzRtcBlameCommandTest {
   public void testCustomTimeout() throws IOException {
     when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.ofNullable(1000L));
     JazzRtcConfiguration rtcConfiguration = new JazzRtcConfiguration(configuration);
-    
+
     assertThat(rtcConfiguration.commandTimeout()).isEqualTo(1000L);
   }
 }
