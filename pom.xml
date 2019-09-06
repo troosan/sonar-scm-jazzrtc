@@ -4,7 +4,7 @@
   <groupId>org.sonarsource.scm.jazzrtc</groupId>
   <artifactId>sonar-scm-jazzrtc-plugin</artifactId>
   <name>SonarQube :: Plugins :: SCM :: Jazz RTC</name>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <packaging>sonar-plugin</packaging>
   <description>Jazz Rational Team Concert SCM Provider.</description>
   <url>http://redirect.sonarsource.com/plugins/scmjazzrtc.html</url>
@@ -154,26 +154,37 @@
         </configuration>
       </plugin>
 
-      <plugin>
-        <groupId>de.jutzig</groupId>
-        <artifactId>github-release-plugin</artifactId>
-        <version>1.2.0</version>
-        <executions>
-          <execution>
-            <id>github-upload</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>release</goal>
-            </goals>
-            <inherited>false</inherited>
-            <configuration>
-              <releaseName>${project.version}</releaseName>
-              <tag>${project.version}</tag>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>de.jutzig</groupId>
+            <artifactId>github-release-plugin</artifactId>
+            <version>1.2.0</version>
+            <executions>
+              <execution>
+                <id>github-upload</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>release</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <releaseName>${project.version}</releaseName>
+                  <tag>${project.version}</tag>
+                  <artifact>${project.build.directory}/${project.artifactId}-${project.version}.jar</artifact>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
