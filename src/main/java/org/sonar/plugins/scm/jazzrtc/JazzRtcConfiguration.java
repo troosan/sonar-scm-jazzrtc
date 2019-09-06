@@ -19,76 +19,77 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.sonar.api.CoreProperties;
+import org.sonar.api.PropertyType;
+import org.sonar.api.config.Configuration;
+import org.sonar.api.config.PropertyDefinition;
+import org.sonar.api.resources.Qualifiers;
+import org.sonar.api.scanner.ScannerSide;
 
 import javax.annotation.CheckForNull;
 
-import org.sonar.api.BatchComponent;
-import org.sonar.api.CoreProperties;
-import org.sonar.api.PropertyType;
-import org.sonar.api.batch.InstantiationStrategy;
-import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.config.Settings;
-import org.sonar.api.resources.Qualifiers;
+import java.util.Arrays;
+import java.util.List;
 
-@InstantiationStrategy(InstantiationStrategy.PER_BATCH)
-public class JazzRtcConfiguration implements BatchComponent {
+@ScannerSide
+public class JazzRtcConfiguration {
 
-	private static final String CATEGORY_JAZZ = "Jazz RTC";
-	public static final String CMD_TIMEOUT = "sonar.jazzrtc.cmd.timeout";
-	public static final long CMD_DEFAULT_TIMEOUT = 60_000;
-	public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
-	public static final String PASSWORD_PROP_KEY = "sonar.jazzrtc.password.secured";
+  private static final String CATEGORY_JAZZ = "Jazz RTC";
+  public static final String CMD_TIMEOUT_PROP_KEY = "sonar.jazzrtc.cmd.timeout";
+  public static final long CMD_DEFAULT_TIMEOUT = 60_000;
+  public static final String USER_PROP_KEY = "sonar.jazzrtc.username";
+  public static final String PASSWRD_PROP_KEY = "sonar.jazzrtc.password.secured";
 
-	private final Settings settings;
+  private final Configuration settings;
 
-	public JazzRtcConfiguration(Settings settings) {
-		this.settings = settings;
-	}
+  public JazzRtcConfiguration(Configuration settings) {
+    this.settings = settings;
+  }
 
-	public static List<PropertyDefinition> getProperties() {
+  public static List<PropertyDefinition> getProperties() {
+    return Arrays.asList(
+      PropertyDefinition.builder(USER_PROP_KEY)
+        .name("Username")
+        .description("Username to be used for Jazz RTC authentication")
+        .type(PropertyType.STRING)
+        .onQualifiers(Qualifiers.PROJECT)
+        .category(CoreProperties.CATEGORY_SCM)
+        .subCategory(CATEGORY_JAZZ)
+        .index(0)
+        .build(),
+      PropertyDefinition.builder(PASSWRD_PROP_KEY)
+        .name("Password")
+        .description("Password to be used for Jazz RTC authentication")
+        .type(PropertyType.PASSWORD)
+        .onQualifiers(Qualifiers.PROJECT)
+        .category(CoreProperties.CATEGORY_SCM)
+        .subCategory(CATEGORY_JAZZ)
+        .index(1)
+        .build(),
+      PropertyDefinition.builder(CMD_TIMEOUT_PROP_KEY)
+        .name("CMD Timeout")
+        .description("Timeout to be used for Jazz RTC Annotate command")
+        .type(PropertyType.INTEGER)
+        .defaultValue("60000")
+        .onQualifiers(Qualifiers.PROJECT)
+        .category(CoreProperties.CATEGORY_SCM)
+        .subCategory(CATEGORY_JAZZ)
+        .index(2)
+        .build());
+  }
 
-		List<PropertyDefinition> listPropertiesDefinition = new ArrayList<PropertyDefinition>();
+  @CheckForNull
+  public String username() {
+    return settings.get(USER_PROP_KEY).orElse(null);
+  }
 
-		listPropertiesDefinition.add(PropertyDefinition.builder(USER_PROP_KEY).name("Username")
-				.description("Username to be used for Jazz RTC authentication").type(PropertyType.STRING)
-				.onQualifiers(Qualifiers.PROJECT).category(CoreProperties.CATEGORY_SCM).subCategory(CATEGORY_JAZZ)
-				.index(0).build());
+  @CheckForNull
+  public String password() {
+    return settings.get(PASSWRD_PROP_KEY).orElse(null);
+  }
 
-		listPropertiesDefinition.add(PropertyDefinition.builder(PASSWORD_PROP_KEY).name("Password")
-				.description("Password to be used for Jazz RTC authentication").type(PropertyType.PASSWORD)
-				.onQualifiers(Qualifiers.PROJECT).category(CoreProperties.CATEGORY_SCM).subCategory(CATEGORY_JAZZ)
-				.index(1).build());
-
-		// SONARSCRTC-9
-		listPropertiesDefinition.add(PropertyDefinition.builder(CMD_TIMEOUT).name("CMD Timeout")
-				.description("Timeout to be used for Jazz RTC Annotate command").type(PropertyType.INTEGER)
-				.defaultValue("60000").onQualifiers(Qualifiers.PROJECT).category(CoreProperties.CATEGORY_SCM)
-				.subCategory(CATEGORY_JAZZ).index(2).build());
-
-		return Collections.unmodifiableList(listPropertiesDefinition);
-		
-	}
-
-	@CheckForNull
-	public String username() {
-		return settings.getString(USER_PROP_KEY);
-	}
-
-	@CheckForNull
-	public String password() {
-		return settings.getString(PASSWORD_PROP_KEY);
-	}
-
-	public long commandTimeout() {
-		int alternativeCommandTimeout = settings.getInt(CMD_TIMEOUT);
-
-		if (alternativeCommandTimeout != 0)
-			return alternativeCommandTimeout;
-
-		return CMD_DEFAULT_TIMEOUT;
-	}
+  public long commandTimeout() {
+    return settings.getLong(CMD_TIMEOUT_PROP_KEY).filter((Long t) -> t != 0L).orElse(CMD_DEFAULT_TIMEOUT);
+  }
 
 }

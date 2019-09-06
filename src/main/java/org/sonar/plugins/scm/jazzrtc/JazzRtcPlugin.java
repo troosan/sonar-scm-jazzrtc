@@ -19,24 +19,15 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.sonar.api.Plugin;
 
-import org.sonar.api.SonarPlugin;
-
-public final class JazzRtcPlugin extends SonarPlugin {
+public final class JazzRtcPlugin implements Plugin {
 
   @Override
-  public List<Object> getExtensions() {
-    List<Object> result = new ArrayList<Object>();
-    
-    result.add(JazzRtcScmProvider.class);
-    result.add(JazzRtcBlameCommand.class);
-    result.add(JazzRtcConfiguration.class);
-    result.addAll(JazzRtcConfiguration.getProperties());
-    
-    return Collections.unmodifiableList(result);
+  public void define(Context context) {
+    context.addExtension(JazzRtcScmProvider.class);
+    context.addExtension(JazzRtcBlameCommand.class);
+    context.addExtension(JazzRtcConfiguration.class);
+    context.addExtensions(JazzRtcConfiguration.getProperties());
   }
-
 }

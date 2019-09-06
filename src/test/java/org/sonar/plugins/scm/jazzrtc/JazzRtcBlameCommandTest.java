@@ -31,7 +31,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -47,10 +49,11 @@ import org.mockito.stubbing.Answer;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.scm.BlameCommand.BlameInput;
 import org.sonar.api.batch.scm.BlameCommand.BlameOutput;
 import org.sonar.api.batch.scm.BlameLine;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.DateUtils;
 import org.sonar.api.utils.System2;
 import org.sonar.api.utils.command.Command;
@@ -59,6 +62,9 @@ import org.sonar.api.utils.command.StreamConsumer;
 import org.sonar.api.utils.command.TimeoutException;
 
 public class JazzRtcBlameCommandTest {
+  @Mock
+  private Configuration configuration;
+
   @Mock
   private BlameOutput result;
 
@@ -87,12 +93,15 @@ public class JazzRtcBlameCommandTest {
     baseDir = temp.newFolder();
     fs = new DefaultFileSystem(baseDir);
     when(input.fileSystem()).thenReturn(fs);
+    when(configuration.get(JazzRtcConfiguration.USER_PROP_KEY)).thenReturn(Optional.ofNullable("test_user"));
+    when(configuration.get(JazzRtcConfiguration.PASSWRD_PROP_KEY)).thenReturn(Optional.ofNullable("test_pwd"));
+    when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.ofNullable(0L));
   }
 
   private DefaultInputFile createTestFile(String filePath, int numLines) throws IOException {
     File source = new File(baseDir, filePath);
-    FileUtils.write(source, "sample content");
-    DefaultInputFile inputFile = new DefaultInputFile("foo", filePath).setLines(numLines);
+    FileUtils.write(source, "sample content", Charset.defaultCharset());
+    DefaultInputFile inputFile = new TestInputFileBuilder(baseDir.getAbsolutePath(), filePath).setLines(numLines).build();
     fs.add(inputFile);
     return inputFile;
   }
@@ -114,7 +123,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
     verify(result).blameResult(inputFile,
       Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
@@ -184,7 +193,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
     verify(result).blameResult(inputFile,
       Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
@@ -210,7 +219,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
 
     verifyZeroInteractions(result);
   }
@@ -231,7 +240,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
 
     verifyZeroInteractions(result);
   }
@@ -256,7 +265,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
 
     verifyZeroInteractions(result);
   }
@@ -283,7 +292,7 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
 
     verifyZeroInteractions(result);
   }
@@ -306,11 +315,30 @@ public class JazzRtcBlameCommandTest {
     });
 
     when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
-    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(new Settings())).blame(input, result);
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
     verify(result).blameResult(inputFile,
       Arrays.asList(new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY"),
         new BlameLine().date(DateUtils.parseDateTime("2014-12-09T09:14:00+0000")).revision("1000").author("Julien HENRY")));
+  }
+
+  /**
+   * Tests that when the timeout is set to 0, it returns the default timeout
+   */
+  @Test
+  public void testDefaultTimeout() throws IOException {
+    when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.ofNullable(0L));
+    JazzRtcConfiguration rtcConfiguration = new JazzRtcConfiguration(configuration);
+
+    assertThat(rtcConfiguration.commandTimeout()).isEqualTo(60000L);
+  }
+
+  @Test
+  public void testCustomTimeout() throws IOException {
+    when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.ofNullable(1000L));
+    JazzRtcConfiguration rtcConfiguration = new JazzRtcConfiguration(configuration);
+
+    assertThat(rtcConfiguration.commandTimeout()).isEqualTo(1000L);
   }
 }

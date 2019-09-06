@@ -21,12 +21,29 @@ package org.sonar.plugins.scm.jazzrtc;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.io.IOException;
+
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.sonar.api.SonarRuntime;
 
 public class JazzRtcPluginTest {
 
+  @Mock
+  private SonarRuntime sonarRuntime;
+
+  @Before
+  public void prepare() throws IOException {
+    MockitoAnnotations.initMocks(this);
+  }
+
   @Test
   public void getExtensions() {
-    assertThat(new JazzRtcPlugin().getExtensions()).hasSize(6);
+    org.sonar.api.Plugin.Context context = new org.sonar.api.Plugin.Context(sonarRuntime);
+
+    new JazzRtcPlugin().define(context);
+    assertThat(context.getExtensions()).hasSize(6);
   }
 }
