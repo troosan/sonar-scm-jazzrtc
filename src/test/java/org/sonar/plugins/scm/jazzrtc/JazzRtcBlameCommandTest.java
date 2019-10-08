@@ -19,23 +19,10 @@
  */
 package org.sonar.plugins.scm.jazzrtc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Optional;
-
 import org.apache.commons.io.FileUtils;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,6 +47,17 @@ import org.sonar.api.utils.command.Command;
 import org.sonar.api.utils.command.CommandExecutor;
 import org.sonar.api.utils.command.StreamConsumer;
 import org.sonar.api.utils.command.TimeoutException;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 public class JazzRtcBlameCommandTest {
   @Mock
@@ -93,9 +91,10 @@ public class JazzRtcBlameCommandTest {
     baseDir = temp.newFolder();
     fs = new DefaultFileSystem(baseDir);
     when(input.fileSystem()).thenReturn(fs);
-    when(configuration.get(JazzRtcConfiguration.USER_PROP_KEY)).thenReturn(Optional.ofNullable("test_user"));
-    when(configuration.get(JazzRtcConfiguration.PASSWRD_PROP_KEY)).thenReturn(Optional.ofNullable("test_pwd"));
-    when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.ofNullable(0L));
+    when(configuration.get(JazzRtcConfiguration.USER_PROP_KEY)).thenReturn(Optional.of("test_user"));
+    when(configuration.get(JazzRtcConfiguration.PASSWRD_PROP_KEY)).thenReturn(Optional.of("test_pwd"));
+    when(configuration.get(JazzRtcConfiguration.PASSWRD_FILE_PROP_KEY)).thenReturn(Optional.empty());
+    when(configuration.getLong(JazzRtcConfiguration.CMD_TIMEOUT_PROP_KEY)).thenReturn(Optional.of(0L));
   }
 
   private DefaultInputFile createTestFile(String filePath, int numLines) throws IOException {
@@ -340,5 +339,32 @@ public class JazzRtcBlameCommandTest {
     JazzRtcConfiguration rtcConfiguration = new JazzRtcConfiguration(configuration);
 
     assertThat(rtcConfiguration.commandTimeout()).isEqualTo(1000L);
+  }
+
+  @Test
+  public void testPasswordFile() throws IOException {
+    when(configuration.get(JazzRtcConfiguration.PASSWRD_FILE_PROP_KEY)).thenReturn(Optional.of("word.pass"));
+    when(commandExecutor.execute(any(Command.class), any(StreamConsumer.class), any(StreamConsumer.class), anyLong())).thenReturn(0);
+    DefaultInputFile inputFile = createTestFile("src/foo.xoo", 3);
+    when(input.filesToBlame()).thenReturn(Arrays.<InputFile>asList(inputFile));
+
+    new JazzRtcBlameCommand(commandExecutor, new JazzRtcConfiguration(configuration)).blame(input, result);
+
+    Matcher<Command> containsPwFile = new BaseMatcher<Command>() {
+      @Override
+      public boolean matches(Object o) {
+        if (!(o instanceof Command)) {
+          return false;
+        }
+        Command cmd = (Command) o;
+        return cmd.toCommandLine().contains("--password-file word.pass");
+      }
+
+      @Override
+      public void describeTo(Description description) {
+        description.appendText("Command that contains \"--password-file word.pass\"");
+      }
+    };
+    verify(commandExecutor).execute(argThat(containsPwFile), any(), any(), anyLong());
   }
 }
