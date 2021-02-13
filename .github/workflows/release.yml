@@ -23,15 +23,9 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
-          server-id: github
 
-      - name: Configure Git user
-        run: |
-          git config user.email "${{github.actor}}@users.noreply.github.com"
-          git config user.name "${{github.actor}}"
-          cat $HOME/settings.xml
-
-      - name: Run maven
-        run: mvn -B release:prepare release:perform
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: qcastel/github-actions-maven-release@master
+        with:
+          access-token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          version-minor: true
