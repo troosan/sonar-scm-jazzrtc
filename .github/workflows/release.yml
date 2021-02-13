@@ -29,7 +29,7 @@ jobs:
         run: |
           git config user.email "${{github.actor}}@users.noreply.github.com"
           git config user.name "${{github.actor}}"
-          cat settings.xml
+          cat $HOME/settings.xml
 
       - name: Run maven
         run: mvn -B release:prepare release:perform
