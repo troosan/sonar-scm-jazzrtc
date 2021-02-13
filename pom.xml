@@ -44,8 +44,8 @@
   </issueManagement>
 
   <ciManagement>
-    <system>Travis</system>
-    <url>https://travis-ci.org/troosan/sonar-scm-jazzrtc</url>
+    <system>GitHub Actions</system>
+    <url>https://github.com/troosan/sonar-scm-jazzrtc/actions</url>
   </ciManagement>
 
   <properties>
