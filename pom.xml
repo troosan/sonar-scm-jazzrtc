@@ -165,7 +165,7 @@
           <plugin>
             <groupId>de.jutzig</groupId>
             <artifactId>github-release-plugin</artifactId>
-            <version>1.2.0</version>
+            <version>1.4.0</version>
             <executions>
               <execution>
                 <id>github-upload</id>
