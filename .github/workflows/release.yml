@@ -29,3 +29,6 @@ jobs:
         with:
           access-token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           version-minor: true
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-1.8-openjdk/
+          GITREPO_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
