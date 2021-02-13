@@ -44,6 +44,6 @@ public class JazzRtcPluginTest {
     org.sonar.api.Plugin.Context context = new org.sonar.api.Plugin.Context(sonarRuntime);
 
     new JazzRtcPlugin().define(context);
-    assertThat(context.getExtensions()).hasSize(6);
+    assertThat(context.getExtensions()).hasSize(7);
   }
 }
