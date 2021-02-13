@@ -1,6 +1,6 @@
 SonarQube Jazz RTC SCM Plugin
 =============================
-[![Build Status](https://travis-ci.org/troosan/sonar-scm-jazzrtc.svg)](https://travis-ci.org/troosan/sonar-scm-jazzrtc)
+![Build Status](https://github.com/troosan/sonar-scm-jazzrtc/workflows/CI%20build/badge.svg)
 
 ## Description
 This plugin implements SCM dependent features of SonarQube for [Jazz RTC](https://jazz.net/library/LearnItem.jsp?href=content/docs/rtc1.0-capabilities/scm.html) projects.

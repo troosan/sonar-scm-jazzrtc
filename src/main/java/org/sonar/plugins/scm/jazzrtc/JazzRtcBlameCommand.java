@@ -86,7 +86,7 @@ public class JazzRtcBlameCommand extends BlameCommand {
       LOG.debug("Skipping untracked file: {}. Annotate command exit code: {}", filename, exitCode);
       return;
     } else if (exitCode != 0) {
-      //https://jazz.net/help-dev/clm/index.jsp?topic=%2Fcom.ibm.team.scm.doc%2Ftopics%2Fr_scm_cli_retcodes.html
+      //https://www.ibm.com/support/knowledgecenter/SSYMRC_7.0.1/com.ibm.team.scm.doc/topics/r_scm_cli_retcodes.html
       LOG.error("Jazz annotate command is exiting with code {}", exitCode);
       throw new IllegalStateException("The jazz annotate command [" + cl.toString() + "] failed: " + stderr.getOutput());
     }
