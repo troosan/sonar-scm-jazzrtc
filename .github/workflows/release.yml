@@ -29,6 +29,8 @@ jobs:
         with:
           access-token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           version-minor: true
+          git-release-bot-name: "${{github.actor}}"
+          git-release-bot-email: "${{github.actor}}@users.noreply.github.com"
         env:
           JAVA_HOME: /usr/lib/jvm/java-1.8-openjdk/
           GITREPO_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
