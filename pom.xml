@@ -32,8 +32,8 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:troosan/sonar-scm-jazzrtc.git</connection>
-    <developerConnection>scm:git:git@github.com:troosan/sonar-scm-jazzrtc.git</developerConnection>
+    <connection>scm:git:https://github.com/troosan/sonar-scm-jazzrtc.git</connection>
+    <developerConnection>scm:git:https://github.com/troosan/sonar-scm-jazzrtc.git</developerConnection>
     <url>https://github.com/troosan/sonar-scm-jazzrtc</url>
     <tag>HEAD</tag>
   </scm>
@@ -49,6 +49,7 @@
   </ciManagement>
 
   <properties>
+    <project.scm.id>github</project.scm.id>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.buildVersion>7.7</sonar.buildVersion>
     <sonar.pluginName>Jazz RTC</sonar.pluginName>
